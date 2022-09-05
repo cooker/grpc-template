@@ -1,0 +1,6 @@
+2022-09-06 09:10:13	INFO	core/logger.go:84	server listening at [::]:50051
+2022-09-06 09:12:03	INFO	core/logger.go:84	server listening at [::]:50051
+2022-09-06 09:15:18	INFO	core/logger.go:84	server listening at [::]:50051
+2022-09-06 09:16:23	INFO	core/logger.go:84	server listening at [::]:50051
+2022-09-06 09:16:28	INFO	core/logger.go:84	Received: world
+2022-09-06 09:16:28	INFO	core/logger.go:84	Received Stream: world
