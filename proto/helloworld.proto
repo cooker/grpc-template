@@ -18,20 +18,12 @@ option go_package = "generate/;proto";
 
 package proto;
 
+import "message.proto";
+
 // The greeting service definition.
 service Greeter {
   // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc SayHello (MessagePayload) returns (MessagePayload) {}
   // 客户端流
-  rpc SayHelloStream (HelloRequest) returns (stream HelloReply) {}
-}
-
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
-}
-
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
+  rpc SayHelloStream (MessagePayload) returns (stream MessagePayload) {}
 }

@@ -18,16 +18,16 @@ var (
 type Server c.Server
 
 // SayHello implements helloworld.GreeterServer
-func (s *Server) SayHello(ctx context.Context, in *bp.HelloRequest) (*bp.HelloReply, error) {
-	c.Infof("Received: %v", in.GetName())
-	return &bp.HelloReply{Message: "Hello " + in.GetName()}, nil
+func (s *Server) SayHello(ctx context.Context, in *bp.MessagePayload) (*bp.MessagePayload, error) {
+	c.Infof("Received: %v", in)
+	return &bp.MessagePayload{Header: &bp.MessageHeader{Code: "200"}}, nil
 }
 
-func (s *Server) SayHelloStream(in *bp.HelloRequest, out bp.Greeter_SayHelloStreamServer) error {
-	c.Infof("Received Stream: %v", in.GetName())
+func (s *Server) SayHelloStream(in *bp.MessagePayload, out bp.Greeter_SayHelloStreamServer) error {
+	c.Infof("Received Stream: %v", in)
 	for i := 0; i < 10; i++ {
-		if err := out.Send(&bp.HelloReply{
-			Message: "xxx",
+		if err := out.Send(&bp.MessagePayload{
+			Header: &bp.MessageHeader{Code: "200", Message: "ccc"},
 		}); err != nil {
 			return err
 		}

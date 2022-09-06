@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "generate/;proto";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+message MessageHeader {
+  //创建时间
+  google.protobuf.Timestamp timestamp = 1;
+  string code = 2;
+  string message = 3;
+  //扩展属性
+  map<string, string> property = 4;
+}
+
+message MessageBody {
+  //内容
+  optional string content = 1;
+}
+
+message MessagePayload {
+  MessageHeader header = 1;
+  optional MessageBody   body   = 2;
+}

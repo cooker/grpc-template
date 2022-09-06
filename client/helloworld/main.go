@@ -36,13 +36,13 @@ func main() {
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
-	r, err := c.SayHello(ctx, &bp.HelloRequest{Name: *name})
+	r, err := c.SayHello(ctx, &bp.MessagePayload{})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-	log.Printf("Greeting: %s", r.GetMessage())
+	log.Printf("Greeting: %v", r)
 
-	stream, err := c.SayHelloStream(ctx, &bp.HelloRequest{Name: *name})
+	stream, err := c.SayHelloStream(ctx, &bp.MessagePayload{Header: &bp.MessageHeader{Code: "200"}})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
