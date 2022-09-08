@@ -14,4 +14,4 @@
 2. go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 
 # proto 生成代码
-protoc -I . helloworld.proto --go_out=. --go-grpc_out=. 
+protoc -I . *.proto --go_out=. --go-grpc_out=. 
