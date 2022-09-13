@@ -5,6 +5,7 @@ option go_package = "generate/;proto";
 package proto;
 
 import "google/protobuf/timestamp.proto";
+import "message.proto";
 
 message HeartBeatRequest {
   //创建时间
@@ -13,12 +14,8 @@ message HeartBeatRequest {
   string fromBy = 3;
 }
 
-message HeartBeatResponse {
-  //创建时间
-  google.protobuf.Timestamp timestamp = 1;
-}
 
 //服务
 service HeartBeatService {
-  rpc Send(HeartBeatRequest) returns(HeartBeatResponse);
+  rpc Send(HeartBeatRequest) returns(MessageResponse);
 }

@@ -15,5 +15,6 @@ func CreateMsgId(clientId string) string {
 		return "0" + "-" + clientId
 	}
 	id := node.Generate()
+
 	return id.String() + "-" + clientId
 }

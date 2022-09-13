@@ -7,6 +7,11 @@ package proto;
 import "google/protobuf/timestamp.proto";
 import "contant.proto";
 
+message State {
+  string code = 1;
+  string message = 2;
+}
+
 message MessageHeader {
   //创建时间
   google.protobuf.Timestamp timestamp = 1;
@@ -14,8 +19,7 @@ message MessageHeader {
   string fromBy = 3;
   string sendTo = 4;
   RouteType routeType = 5;
-  string code = 6;
-  string message = 7;
+  State state = 6;
 }
 
 message MessageBody {
@@ -28,4 +32,24 @@ message MessagePayload {
   //扩展属性
   map<string, string> property = 2;
   optional MessageBody   body   = 3;
+}
+
+message MessageResponse {
+  //创建时间
+  google.protobuf.Timestamp timestamp = 1;
+  string msgId = 2;
+  State state = 3;
+}
+
+message ClientPullRequest {
+  //创建时间
+  google.protobuf.Timestamp timestamp = 1;
+  string msgId = 2;
+  string fromBy = 3;
+}
+
+//服务
+service MessageService {
+  rpc Send(MessagePayload) returns(MessageResponse);
+  rpc Pull(ClientPullRequest) returns(stream MessagePayload);
 }
