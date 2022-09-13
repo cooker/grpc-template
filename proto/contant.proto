@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "generate/;proto";
+
+package proto;
+
+enum RouteType {
+  DIRECT = 0; //直达
+  RULE = 1; // 规则
+  GROUP = 2; // 群组
+}

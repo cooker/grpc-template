@@ -5,14 +5,17 @@ option go_package = "generate/;proto";
 package proto;
 
 import "google/protobuf/timestamp.proto";
+import "contant.proto";
 
 message MessageHeader {
   //创建时间
   google.protobuf.Timestamp timestamp = 1;
-  string code = 2;
-  string message = 3;
-  //扩展属性
-  map<string, string> property = 4;
+  string msgId = 2;
+  string fromBy = 3;
+  string sendTo = 4;
+  RouteType routeType = 5;
+  string code = 6;
+  string message = 7;
 }
 
 message MessageBody {
@@ -22,5 +25,7 @@ message MessageBody {
 
 message MessagePayload {
   MessageHeader header = 1;
-  optional MessageBody   body   = 2;
+  //扩展属性
+  map<string, string> property = 2;
+  optional MessageBody   body   = 3;
 }

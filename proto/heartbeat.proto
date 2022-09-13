@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "generate/;proto";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+message HeartBeatRequest {
+  //创建时间
+  google.protobuf.Timestamp timestamp = 1;
+  string msgId = 2;
+  string fromBy = 3;
+}
+
+message HeartBeatResponse {
+  //创建时间
+  google.protobuf.Timestamp timestamp = 1;
+}
+
+service HeartBeatService {
+  rpc Send(HeartBeatRequest) returns(HeartBeatResponse);
+}
