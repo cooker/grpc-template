@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect

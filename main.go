@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"google.golang.org/grpc"
+	"grpc-template/action"
 	c "grpc-template/core"
+	bp "grpc-template/proto/generate"
 	"net"
 )
 
@@ -21,6 +23,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
+	bp.RegisterHeartBeatServiceServer(s, &action.HeartBeatAction{})
 	//bp.RegisterGreeterServer(s, &Server{})
 
 	c.Infof("server listening at %v", lis.Addr())

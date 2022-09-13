@@ -18,6 +18,7 @@ message HeartBeatResponse {
   google.protobuf.Timestamp timestamp = 1;
 }
 
+//服务
 service HeartBeatService {
   rpc Send(HeartBeatRequest) returns(HeartBeatResponse);
 }
