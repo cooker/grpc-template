@@ -54,6 +54,7 @@ func main() {
 //注册action
 func registerAction(s *grpc.Server) {
 	bp.RegisterHeartBeatServiceServer(s, &action.HeartBeatAction{})
+	bp.RegisterMessageServiceServer(s, &action.MessageAction{})
 }
 
 //拦截器
