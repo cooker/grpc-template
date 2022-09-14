@@ -5,14 +5,26 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/metadata"
 	c "grpc-template/core"
 	bp "grpc-template/proto/generate"
 	"testing"
 	"time"
 )
 
+var kacp = keepalive.ClientParameters{
+	Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
+	Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
+	PermitWithoutStream: true,             // send pings even without active streams
+}
+
 func TestHeartBeat(t *testing.T) {
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(kacp),
+	}
+	conn, err := grpc.Dial("localhost:50051", opts...)
 	if err != nil {
 		panic(err)
 	}
@@ -28,23 +40,25 @@ func TestHeartBeat(t *testing.T) {
 				break
 			}
 			client := bp.NewHeartBeatServiceClient(conn)
-			resp, err := client.Send(context.TODO(), &bp.HeartBeatRequest{
+			outgoingContext := metadata.AppendToOutgoingContext(context.TODO(), "authorization", "123456")
+			resp, err := client.Send(outgoingContext, &bp.HeartBeatRequest{
 				Timestamp: c.NowTime(),
 				MsgId:     c.CreateMsgId("1"),
 				FromBy:    "1",
 			})
 
 			if err != nil {
-				panic(err)
+				fmt.Println("出现异常", err)
+				time.Sleep(3 * time.Second)
 			}
 			fmt.Printf("发送成功 %v\n", resp)
 
 		}
 	}()
 
-	time.Sleep(30 * time.Second)
-	timer.Stop()
-	conn.Close()
+	select {}
+	defer conn.Close()
+	defer timer.Stop()
 }
 
 func BenchmarkHeartBeat(b *testing.B) {

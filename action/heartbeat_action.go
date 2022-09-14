@@ -15,6 +15,6 @@ func (HeartBeatAction) Send(ctx context.Context, in *bp.HeartBeatRequest) (*bp.M
 	c.Infof("心跳 %v", in)
 	return &bp.MessageResponse{
 		Timestamp: c.NowTime(),
-		MsgId:     c.CreateMsgId(strconv.Itoa(c.SYS_ID)),
+		MsgId:     c.CreateMsgId(strconv.Itoa(c.GATEWAY)),
 	}, nil
 }

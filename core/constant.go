@@ -1,5 +1,8 @@
 package core
 
 const (
-	SYS_ID = iota
+	GATEWAY = iota
+	ROUTE
 )
+
+const AUTH_HEADER = "authorization"
