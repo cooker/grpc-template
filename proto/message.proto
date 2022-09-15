@@ -24,14 +24,14 @@ message MessageHeader {
 
 message MessageBody {
   //内容
-  optional string content = 1;
+  string content = 1;
 }
 
 message MessagePayload {
   MessageHeader header = 1;
   //扩展属性
   map<string, string> property = 2;
-  optional MessageBody   body   = 3;
+  MessageBody   body   = 3;
 }
 
 message MessageResponse {

@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"fmt"
 	c "grpc-template/core"
 	bp "grpc-template/proto/generate"
 	"strconv"
@@ -22,6 +23,16 @@ func (s *MessageAction) Send(ctx context.Context, playload *bp.MessagePayload) (
 }
 
 func (s *MessageAction) Pull(request *bp.ClientPullRequest, out bp.MessageService_PullServer) error {
+	conn := make(chan struct{})
+	manager := ConnManager{
+		conn: conn,
+		out:  &out,
+	}
+	connMap.Set(request.MsgId, &manager)
 
+	select {
+	case <-conn:
+		fmt.Printf("链接关闭 %s", request.MsgId)
+	}
 	return nil
 }

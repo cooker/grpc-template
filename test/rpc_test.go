@@ -14,21 +14,26 @@ import (
 )
 
 var kacp = keepalive.ClientParameters{
-	Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
-	Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
-	PermitWithoutStream: true,             // send pings even without active streams
+	Time:                5 * time.Second, // send pings every 10 seconds if there is no activity
+	Timeout:             3 * time.Second, // wait 1 second for ping ack before considering the connection dead
+	PermitWithoutStream: true,            // send pings even without active streams
 }
 
-func TestHeartBeat(t *testing.T) {
+func connection() (*grpc.ClientConn, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithKeepaliveParams(kacp),
 	}
 	conn, err := grpc.Dial("localhost:50051", opts...)
+	return conn, err
+}
+
+func TestHeartBeat(t *testing.T) {
+
+	conn, err := connection()
 	if err != nil {
 		panic(err)
 	}
-
 	timer := time.NewTicker(1 * time.Second)
 
 	go func() {
@@ -56,7 +61,9 @@ func TestHeartBeat(t *testing.T) {
 		}
 	}()
 
-	select {}
+	for {
+
+	}
 	defer conn.Close()
 	defer timer.Stop()
 }
@@ -78,4 +85,59 @@ func BenchmarkHeartBeat(b *testing.B) {
 		}
 	}
 	conn.Close()
+}
+
+func TestSendMessage(t *testing.T) {
+	conn, err := connection()
+	if err != nil {
+		panic(err)
+	}
+
+	client := bp.NewMessageServiceClient(conn)
+	outgoingContext := metadata.AppendToOutgoingContext(context.TODO(), "authorization", "123456")
+	client.Send(outgoingContext, &bp.MessagePayload{
+		Header: &bp.MessageHeader{
+			Timestamp: c.NowTime(),
+			MsgId:     c.CreateMsgId("12"),
+			FromBy:    "12",
+			SendTo:    "33",
+			RouteType: bp.RouteType_RULE,
+			State: &bp.State{
+				Code:    "200",
+				Message: "success",
+			},
+		},
+		Property: nil,
+		Body: &bp.MessageBody{
+			Content: "hello",
+		},
+	})
+}
+
+func TestPullMessage(t *testing.T) {
+	conn, err := connection()
+	if err != nil {
+		panic(err)
+	}
+
+	client := bp.NewMessageServiceClient(conn)
+	outgoingContext := metadata.AppendToOutgoingContext(context.TODO(), "authorization", "123456")
+	request := bp.ClientPullRequest{
+		FromBy: "222",
+	}
+	pull, err := client.Pull(outgoingContext, &request)
+	if err == nil {
+		for {
+			recv, err := pull.Recv()
+			if err == nil && recv != nil {
+				t.Logf("收到消息 %v\n", recv)
+			} else {
+				t.Log(err)
+				break
+			}
+		}
+	} else {
+		panic(err)
+	}
+
 }
