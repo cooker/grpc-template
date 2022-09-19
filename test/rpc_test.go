@@ -23,9 +23,15 @@ func connection() (*grpc.ClientConn, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithKeepaliveParams(kacp),
+		grpc.WithUnaryInterceptor(auth),
 	}
 	conn, err := grpc.Dial("localhost:50051", opts...)
 	return conn, err
+}
+
+func auth(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	outgoingContext := metadata.AppendToOutgoingContext(context.TODO(), "authorization", "123456")
+	return invoker(outgoingContext, method, req, reply, cc, opts...)
 }
 
 func TestHeartBeat(t *testing.T) {
@@ -35,7 +41,8 @@ func TestHeartBeat(t *testing.T) {
 		panic(err)
 	}
 	timer := time.NewTicker(1 * time.Second)
-
+	defer conn.Close()
+	defer timer.Stop()
 	go func() {
 		for {
 
@@ -45,8 +52,7 @@ func TestHeartBeat(t *testing.T) {
 				break
 			}
 			client := bp.NewHeartBeatServiceClient(conn)
-			outgoingContext := metadata.AppendToOutgoingContext(context.TODO(), "authorization", "123456")
-			resp, err := client.Send(outgoingContext, &bp.HeartBeatRequest{
+			resp, err := client.Send(context.Background(), &bp.HeartBeatRequest{
 				Timestamp: c.NowTime(),
 				MsgId:     c.CreateMsgId("1"),
 				FromBy:    "1",
@@ -61,11 +67,7 @@ func TestHeartBeat(t *testing.T) {
 		}
 	}()
 
-	for {
-
-	}
-	defer conn.Close()
-	defer timer.Stop()
+	select {}
 }
 
 func BenchmarkHeartBeat(b *testing.B) {
@@ -121,10 +123,23 @@ func TestPullMessage(t *testing.T) {
 	}
 
 	client := bp.NewMessageServiceClient(conn)
-	outgoingContext := metadata.AppendToOutgoingContext(context.TODO(), "authorization", "123456")
+	outgoingContext := metadata.AppendToOutgoingContext(context.Background(), "authorization", "123456")
 	request := bp.ClientPullRequest{
 		FromBy: "222",
 	}
+	go func() {
+		bhClient := bp.NewHeartBeatServiceClient(conn)
+		ticker := time.NewTicker(3 * time.Second)
+		for {
+			<-ticker.C
+			resp, err2 := bhClient.Send(context.Background(), &bp.HeartBeatRequest{})
+			if err2 != nil {
+				t.Fatal("出错 ", err2)
+			} else {
+				t.Logf("发送心跳 %v", resp)
+			}
+		}
+	}()
 	pull, err := client.Pull(outgoingContext, &request)
 	if err == nil {
 		for {

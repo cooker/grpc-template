@@ -12,9 +12,9 @@ type HeartBeatAction struct {
 }
 
 func (HeartBeatAction) Send(ctx context.Context, in *bp.HeartBeatRequest) (*bp.MessageResponse, error) {
-	c.Infof("心跳 %v", in)
 	return &bp.MessageResponse{
 		Timestamp: c.NowTime(),
 		MsgId:     c.CreateMsgId(strconv.Itoa(c.GATEWAY)),
+		State:     &c.SUCCESS_STATE,
 	}, nil
 }

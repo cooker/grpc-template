@@ -1,0 +1,5 @@
+port: 50051
+node: 1
+channel:
+  type: nats
+  url: nats://127.0.0.1:4222

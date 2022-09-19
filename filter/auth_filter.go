@@ -8,6 +8,7 @@ import (
 )
 
 //认证
+
 func ValidAuthFilter(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -20,6 +21,20 @@ func ValidAuthFilter(ctx context.Context, req interface{}, info *grpc.UnaryServe
 	}
 	// Continue execution of handler after ensuring a valid token.
 	return handler(ctx, req)
+}
+
+func ValidAuthStreamFilter(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+	md, ok := metadata.FromIncomingContext(ss.Context())
+	if !ok {
+		return c.ErrMissingMetadata
+	}
+	// The keys within metadata.MD are normalized to lowercase.
+	// See: https://godoc.org/google.golang.org/grpc/metadata#New
+	if !valid(md[c.AUTH_HEADER]) {
+		return c.ErrInvalidToken
+	}
+	// Continue execution of handler after ensuring a valid token.
+	return handler(srv, ss)
 }
 
 func valid(authorization []string) bool {

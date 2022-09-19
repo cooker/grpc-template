@@ -33,10 +33,6 @@ func (r *MessageRouter) Push(payload *bp.MessagePayload) error {
 	return nil
 }
 
-func init() {
-	go startRoute()
-}
-
 func startRoute() {
 	for {
 		select {
@@ -60,7 +56,7 @@ func send(msg *bp.MessagePayload) {
 				}
 			}
 		} else {
-			println("消息不合法")
+			c.Warn("消息不合法")
 		}
 	}
 	marshal, err := json.Marshal(*msg)
@@ -69,4 +65,9 @@ func send(msg *bp.MessagePayload) {
 	} else {
 		panic(err)
 	}
+}
+
+//初始化
+func init() {
+	go startRoute()
 }

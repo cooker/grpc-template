@@ -16,6 +16,10 @@
 # proto 生成代码
 protoc -I . *.proto --go_out=. --go-grpc_out=. 
 
+# 环境变量
+`GODEBUG=http2debug=2` 调试
+
 # 待解决问题
 
-* [ ] 心跳保活
+* [x] 心跳保活
+  * MaxConnectionAge 设置为最大值
