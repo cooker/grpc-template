@@ -2,7 +2,9 @@ package action
 
 import (
 	"encoding/json"
+	"github.com/nats-io/nats.go"
 	cmap "github.com/orcaman/concurrent-map/v2"
+	"google.golang.org/protobuf/proto"
 	c "grpc-template/core"
 	bp "grpc-template/proto/generate"
 )
@@ -13,6 +15,7 @@ var (
 	MsgRouter = new(MessageRouter)
 	msgQueue  = make(chan *bp.MessagePayload, 10000)
 	connMap   = cmap.New[*ConnManager]()
+	nc        *nats.Conn
 )
 
 type ConnManager struct {
@@ -34,12 +37,36 @@ func (r *MessageRouter) Push(payload *bp.MessagePayload) error {
 }
 
 func startRoute() {
+	c.ConfigYml.Wait()
+	c.Infof("启动消息路由")
+	initNats()
 	for {
 		select {
 		case msg := <-msgQueue:
-			send(msg)
+			mess, err := proto.Marshal(msg)
+			if err != nil {
+				c.Errorf("消息路由失败", c.Json2Str(msg), err)
+			} else {
+				err := nc.Publish(c.ConfigYml.Channel.Topic, mess)
+				if err != nil {
+					c.Errorf("消息路由失败 %s", c.Json2Str(msg), err)
+				}
+			}
 		}
 	}
+}
+
+func initNats() {
+	nc, _ = nats.Connect(c.ConfigYml.Channel.Url)
+	nc.Subscribe(c.ConfigYml.Channel.Topic, func(msg *nats.Msg) {
+		payload := bp.MessagePayload{}
+		err := proto.Unmarshal(msg.Data, &payload)
+		if err != nil {
+			c.Errorf("消息接收失败 >> %s", msg.Header)
+			return
+		}
+		send(&payload)
+	})
 }
 
 func send(msg *bp.MessagePayload) {
